@@ -1,16 +1,9 @@
-// All D3 code is written here (it is a js library after all...)
-// Similar methods to jQuery
+const dataset = [1, 2, 3, 4, 5];
 
-d3.select(); // returns the first element matching the specified criteria
-d3.selectAll(); // returns all elements matching the specified criteria
-
-d3.select('h1').style('color', 'red') // finds the first `h1` and styles it `red`
-.attr('class', 'heading') // add a `class` attribute to h1 named `heading`
-.text('Updated h1 tag'); // sets the `h1` text to `Updated h1 tag`
-// this is a method chain
-
-d3.select('body').append('p').text('First Paragraph');
-d3.select('body').append('p').text('Second Paragraph');
-d3.select('body').append('p').text('Third Paragraph');
-
-d3.selectAll('p').style('color', '#0000FF');
+d3.select('body') // parent
+    .selectAll('p') // child
+    .data(dataset) // loads the data for further processing; the data is bound to the `p` selection.
+    .enter() // "each element in the data array is paired with the corresponding node in the selection. If there are fewer nodes than data, the extra data elements form the enter selection, which you can instantiate by appending to the enter selection."
+    .append('p') // appends paragraph for each data element
+    // .text('D3 is awesome!!');
+    .text(function(d) { return `I\'m data number: ${d}`; }); // specified the text for each `p` appended
