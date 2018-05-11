@@ -1,42 +1,33 @@
-// Using `var` because D3 docs say: Since method chaining can only be used to descend into the document hierarchy, use var to keep references to selections and go back up.
-var dataset = [80, 100, 56, 120, 180, 30, 40, 120, 160];
+// Scales - functions that transform data by increasing/decreasing for better visualization
 
-var svgWidth = 500, svgHeight = 300, barPadding = 5; // chaining variables! What?! So cool! This sets the SVG dimensions in the DOM
-var barWidth = (svgWidth / dataset.length); // 55.55556
+// var dataset = [80, 100, 56, 120, 180, 30, 40, 120, 160];
+var dataset = [1, 2, 3, 4, 5]; // with this dataset, the chart is barely visible. Using scales functions will fix that problem.
+
+var svgWidth = 500, svgHeight = 300, barPadding = 5;
+var barWidth = (svgWidth / dataset.length);
 
 
 var svg = d3.select('svg')
-    .attr("width", svgWidth) // 500
-    .attr("height", svgHeight); // 300
+    .attr("width", svgWidth)
+    .attr("height", svgHeight);
 
-var barChart = svg.selectAll("rect") // `rect` is an svg default for `rectangle`
-    .data(dataset) // loads data
-    .enter() // prepared each datum for further action
-    .append("rect") // each datum is bound to a `rect`
-    .attr("y", function(d) {
-         return svgHeight - d
-    }) // each `rect`'s attr.
-    .attr("height", function(d) {
-        return d;
-    })
-    .attr("width", barWidth - barPadding) // 50.5556
-    .attr("transform", function (d, i) { //
-        const translate = [barWidth * i, 0]; // barWidth * index, height below x axis
-        return "translate("+ translate +")"; // this allows each bar to begin relative to the previous bar instead of being stacked upon each other.
-    });
+// Scale
+var yScale = d3.scaleLinear() // good default scale for quantitative data as it keeps proportional variances.
+    .domain([0, d3.max(dataset)]) // defines the interval (0...maxNumberInDataset)
+    .range([0, svgHeight]); // transforms the domain interval into a new interval (0...300) to fit within the specified container dimensions
 
-// Creating Labels
-var text = svg.selectAll("text")
+var barChart = svg.selectAll("rect")
     .data(dataset)
     .enter()
-    .append("text")
-    .text(function(d) {
-        return d; // .text() can take a string or a function.
+    .append("rect")
+    .attr("y", function(d) {
+         return svgHeight - yScale(d) // transformed y size
     })
-    .attr("y", function(d, i) { // removing `i` (index) from the parameter doesn't affect the chart. It's also not being returned, so why have it?
-        return svgHeight - d - 2; // 2px in order for the text to have spacing above the chart
+    .attr("height", function(d) {
+        return yScale(d); // transformed height
     })
-    .attr("x", function(d, i) {
-        return barWidth * i;
-    })
-    .attr("fill", "#A64C38");
+    .attr("width", barWidth - barPadding)
+    .attr("transform", function (d, i) {
+        var translate = [barWidth * i, 0];
+        return "translate("+ translate +")";
+    });
