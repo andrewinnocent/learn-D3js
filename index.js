@@ -1,33 +1,41 @@
-// Scales - functions that transform data by increasing/decreasing for better visualization
+// D3 Axes methods:
+    // d3.axisTop()
+    // d3.axisRight()
+    // d3.axisBottom()
+    // d3.axisLeft()
 
-// var dataset = [80, 100, 56, 120, 180, 30, 40, 120, 160];
-var dataset = [1, 2, 3, 4, 5]; // with this dataset, the chart is barely visible. Using scales functions will fix that problem.
+var data= [80, 100, 56, 120, 180, 30, 40, 120, 160];
 
-var svgWidth = 500, svgHeight = 300, barPadding = 5;
-var barWidth = (svgWidth / dataset.length);
+var svgWidth = 500, svgHeight = 300;
 
-
+// define the SVG container
 var svg = d3.select('svg')
-    .attr("width", svgWidth)
-    .attr("height", svgHeight);
+   .attr("width", svgWidth)
+   .attr("height", svgHeight);
 
-// Scale
-var yScale = d3.scaleLinear() // good default scale for quantitative data as it keeps proportional variances.
-    .domain([0, d3.max(dataset)]) // defines the interval (0...maxNumberInDataset)
-    .range([0, svgHeight]); // transforms the domain interval into a new interval (0...300) to fit within the specified container dimensions
+// create the scale to use for the axis
+var xScale = d3.scaleLinear()
+   .domain([0, d3.max(data)])
+   .range([0, svgWidth]);
 
-var barChart = svg.selectAll("rect")
-    .data(dataset)
-    .enter()
-    .append("rect")
-    .attr("y", function(d) {
-         return svgHeight - yScale(d) // transformed y size
-    })
-    .attr("height", function(d) {
-        return yScale(d); // transformed height
-    })
-    .attr("width", barWidth - barPadding)
-    .attr("transform", function (d, i) {
-        var translate = [barWidth * i, 0];
-        return "translate("+ translate +")";
-    });
+var yScale = d3.scaleLinear()
+   .domain([0, d3.max(data)])
+   .range([svgHeight, 0]);
+
+var xAxis = d3.axisBottom()
+    .scale(xScale);
+
+typeof(xAxis); // It's a function, therefore it needs to be called.
+
+var yAxis = d3.axisLeft()
+    .scale(yScale);
+
+svg.append("g") // <g> is `group` element for SVG. It will hold all the elements the called function will produce.
+   .attr("transform", "translate(50, 10)")
+   .call(yAxis); // call (or invoke) the function
+
+var xAxisTranslate = svgHeight - 20;
+
+svg.append("g")
+   .attr("transform", "translate(50, " + xAxisTranslate  +")")
+   .call(xAxis);
