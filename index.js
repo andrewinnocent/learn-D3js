@@ -1,41 +1,27 @@
-// D3 Axes methods:
-    // d3.axisTop()
-    // d3.axisRight()
-    // d3.axisBottom()
-    // d3.axisLeft()
+var svgWidth = 600, svgHeight = 500;
 
-var data= [80, 100, 56, 120, 180, 30, 40, 120, 160];
-
-var svgWidth = 500, svgHeight = 300;
-
-// define the SVG container
-var svg = d3.select('svg')
+var svg = d3.select("svg")
    .attr("width", svgWidth)
-   .attr("height", svgHeight);
+   .attr("height", svgHeight)
+   .attr("class", "svg-container")
 
-// create the scale to use for the axis
-var xScale = d3.scaleLinear()
-   .domain([0, d3.max(data)])
-   .range([0, svgWidth]);
+var line = svg.append("line")
+   .attr("x1", 100) // starting position from left of the svg container
+   .attr("y1", 50) // starting position from top of the svg container
+   .attr("x2", 500) // ending position from left of the svg container
+   .attr("y2", 75) // ending position from top of the svg container
+   .attr("stroke", "red") // stroke attribute is required for the line to be visible
+   .attr("stroke-width", 5); // in pixels
 
-var yScale = d3.scaleLinear()
-   .domain([0, d3.max(data)])
-   .range([svgHeight, 0]);
+var rect = svg.append("rect")
+   .attr("x", 200) // starting position from left of the svg container
+   .attr("y", 100) // starting position from top of the svg container
+   .attr("width", 200)
+   .attr("height", 100)
+   .attr("fill", "#9B95FF");
 
-var xAxis = d3.axisBottom()
-    .scale(xScale);
-
-typeof(xAxis); // It's a function, therefore it needs to be called.
-
-var yAxis = d3.axisLeft()
-    .scale(yScale);
-
-svg.append("g") // <g> is `group` element for SVG. It will hold all the elements the called function will produce.
-   .attr("transform", "translate(50, 10)")
-   .call(yAxis); // call (or invoke) the function
-
-var xAxisTranslate = svgHeight - 20;
-
-svg.append("g")
-   .attr("transform", "translate(50, " + xAxisTranslate  +")")
-   .call(xAxis);
+var circle = svg.append("circle")
+   .attr("cx", 200) // position is from the center of the circle
+   .attr("cy", 300) // position is from the center of the circle
+   .attr("r", 80) // `r` is `radius` - starting from the center to the border of the circle
+   .attr("fill", "#7CE8D5");
