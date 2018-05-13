@@ -1,51 +1,98 @@
-var data = [
-  {"platform": "Android", "percentage": 40.11},
-  {"platform": "Windows", "percentage": 36.69},
-  {"platform": "iOS", "percentage": 13.06}
-];
+//API to fetch historical data of Bitcoin Price Index
+const api = 'https://api.coindesk.com/v1/bpi/historical/close.json?start=2017-12-31&end=2018-04-01';
 
-var svgWidth = 500, svgHeight = 300, radius =  Math.min(svgWidth, svgHeight) / 2; // take the min and divide by 2 for the center point of the chart in the SVG container
-
-var svg = d3.select('svg')
-    .attr("width", svgWidth)
-    .attr("height", svgHeight);
-
-//Create group element to hold pie chart
-var g = svg.append("g")
-    .attr("transform", "translate(" + radius + "," + radius + ")"); // translates the chart to the center of the SVG element
-
-var color = d3.scaleOrdinal(d3.schemeCategory10); // built-in method for color options (10 of them)
-
-var pie = d3.pie().value(function(d) {
-    console.log(d); // object
-     return d.percentage;
-   });
-
-var path = d3.arc()
-    .outerRadius(radius) // defines the boundaries of the arc
-    .innerRadius(0); // defines the boundaries of the arc
-
-var arc = g.selectAll("arc")
-    .data(pie(data))
-    .enter()
-    .append("g");
-
-arc.append("path")
-    .attr("d", path)
-    .attr("fill", function(d) {
-      console.log(d); // array
-      return color(d.data.percentage);
-    });
-
-var label = d3.arc()
-    .outerRadius(radius)
-    .innerRadius(0);
-
-arc.append("text")
-    .attr("transform", function(d) {
-        return "translate(" + label.centroid(d) + ")";
+/**
+ * Loading data from API when DOM Content has been loaded'.
+ */
+document.addEventListener("DOMContentLoaded", function (event) {
+fetch(api)
+    .then(function (response) {
+      // console.log('Response is', response); // 200
+      return response.json();
     })
-    .attr("text-anchor", "middle")
-    .text(function(d) {
-      return d.data.platform + ":" + d.data.percentage + "%";
-    });
+    .then(function (data) {
+        var parsedData = parseData(data);
+        drawChart(parsedData);
+    })
+    .catch(function (err) {
+      console.log(err);
+    })
+});
+
+/**
+ * Parse data into key-value pairs
+ * @param {object} data Object containing historical data of BPI
+ */
+function parseData (data) {
+    var arr = [];
+    for (var i in data.bpi) {
+        arr.push({
+            date: new Date(i), //date
+            value: +data.bpi[i] //convert string to number
+        });
+    }
+    return arr;
+}
+
+/**
+ * Creates a chart using D3
+ * @param {object} data Object containing historical data of BPI
+ */
+function drawChart(data) {
+  var svgWidth = 600, svgHeight = 400;
+  var margin = { top: 20, right: 20, bottom: 30, left: 50 };
+  var width = svgWidth - margin.left - margin.right;
+  var height = svgHeight - margin.top - margin.bottom;
+
+  var svg = d3.select('svg')
+      .attr("width", svgWidth)
+      .attr("height", svgHeight);
+
+  var g = svg.append("g")
+      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+  var x = d3.scaleTime()
+      .rangeRound([0, width]);
+
+  var y = d3.scaleLinear()
+      .rangeRound([height, 0]);
+
+  var line = d3.line()
+      .x(function (d) {
+        return x(d.date)
+      })
+      .y(function (d) {
+        return y(d.value)
+      })
+      x.domain(d3.extent(data, function (d) {
+        return d.date
+      })); // returns min and max value
+      y.domain(d3.extent(data, function (d) {
+        return d.value
+      })); // returns min and max value
+
+  g.append("g")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(x))
+      .select(".domain")
+      .remove();
+
+  g.append("g")
+      .call(d3.axisLeft(y))
+      .append("text")
+      .attr("fill", "#000")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 6)
+      .attr("dy", "0.71em")
+      .attr("text-anchor", "end")
+      .text("Price ($)");
+
+  g.append("path")
+      .datum(data)
+      .attr("fill", "none")
+      .attr("stroke", "steelblue")
+      .attr("stroke-linejoin", "round")
+      .attr("stroke-linecap", "round")
+      .attr("stroke-width", 1.5)
+      .attr("d", line);
+}
